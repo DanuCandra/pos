@@ -60,10 +60,11 @@ class _TambahMenuState extends State<TambahMenu> {
       appBar: AppBar(
         title: const Text(
           'Tambah Menu',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white,),
         ),
-        backgroundColor: Colors.teal[700],
+        backgroundColor: Colors.teal,
         centerTitle: true,
+         automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),

@@ -134,11 +134,11 @@ class _HomeState extends State<Home> {
         ),
       );
     } else if (index == 3) {
-      // Navigasi ke halaman Laporan
+      
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => Laporan(checkoutItems: widget.checkoutItems), // Arahkan ke halaman Laporan
+          builder: (context) => Laporan(checkoutItems: widget.checkoutItems), 
         ),
       );
     } else if (index == 4) {
@@ -174,8 +174,10 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Menu Danu Cafe', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text('Menu Danu Cafe', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
         backgroundColor: Colors.teal,
+        centerTitle: true,
+         automaticallyImplyLeading: false,
       ),
       body: Column(
         children: [
@@ -186,7 +188,7 @@ class _HomeState extends State<Home> {
       ),
       bottomNavigationBar: Navbar(
         currentIndex: _currentIndex,
-        onTabTapped: _onTabTapped, // Arahkan ke halaman yang sesuai
+        onTabTapped: _onTabTapped, 
       ),
     );
   }

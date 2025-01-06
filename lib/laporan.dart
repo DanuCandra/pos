@@ -5,7 +5,7 @@ import 'package:pos_kasir/database_helper.dart';
 import 'package:pos_kasir/home.dart';
 import 'package:pos_kasir/login_screen.dart';
 import 'package:pos_kasir/tambahmenu.dart';
-import 'navbar.dart'; 
+import 'navbar.dart';
 
 class Laporan extends StatefulWidget {
   final List<Map<String, dynamic>> checkoutItems;
@@ -57,12 +57,23 @@ class _LaporanState extends State<Laporan> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Laporan Transaksi'),
+        title: Text(
+          'Laporan Transaksi',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        centerTitle: true,
         backgroundColor: Colors.teal,
+        automaticallyImplyLeading: false,
       ),
       body: _transactions.isEmpty
-          ? Center(child: Text('Tidak ada transaksi.'))
+          ? Center(
+              child: Text(
+                'Tidak ada transaksi.',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+            )
           : ListView.builder(
+              padding: EdgeInsets.all(16),
               itemCount: _transactions.length,
               itemBuilder: (context, index) {
                 final transaction = _transactions[index];
@@ -73,11 +84,11 @@ class _LaporanState extends State<Laporan> {
                 final change = transaction['change'] ?? 0;
                 final date = _formatDate(transaction['date']);
 
-                return FutureBuilder<List<Map<String, dynamic>>>( 
+                return FutureBuilder<List<Map<String, dynamic>>>(
                   future: _getTransactionItems(transactionId),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return CircularProgressIndicator();
+                      return Center(child: CircularProgressIndicator());
                     }
 
                     final items = snapshot.data ?? [];
@@ -85,35 +96,54 @@ class _LaporanState extends State<Laporan> {
                         0, (sum, item) => sum + (item['quantity'] as int));
 
                     return Card(
-                      margin: EdgeInsets.all(12),
+                      margin: EdgeInsets.only(bottom: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
                       ),
-                      elevation: 4,
-                      child: ListTile(
+                      elevation: 6,
+                      child: ExpansionTile(
+                        leading: Icon(Icons.receipt_long, color: Colors.teal),
                         title: Text(
-                          'Total: Rp ${NumberFormat.decimalPattern('id').format(totalAmount)}',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          'Rp ${NumberFormat.decimalPattern('id').format(totalAmount)}',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                         ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Tanggal: $date'),
-                            Text('Pembayaran: $paymentMethod'),
-                            Text('Jumlah Item Terjual: $totalItems'),
-                            ...items.map((item) => Text(
-                                  '${item['name']} x ${item['quantity']}',
-                                )),
-                            if (paymentMethod == 'Cash') ...[
-                              Text(
-                                'Uang Pembeli: Rp ${NumberFormat.decimalPattern('id').format(customerCash)}',
-                              ),
-                              Text(
-                                'Kembalian: Rp ${NumberFormat.decimalPattern('id').format(change)}',
-                              ),
-                            ],
-                          ],
-                        ),
+                        subtitle: Text('Tanggal: $date'),
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Divider(),
+                                Text(
+                                  'Metode Pembayaran: $paymentMethod',
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                                Text(
+                                  'Jumlah Item Terjual: $totalItems',
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                                ...items.map(
+                                  (item) => Text(
+                                    '${item['name']} x ${item['quantity']}',
+                                    style: TextStyle(fontSize: 14),
+                                  ),
+                                ),
+                                if (paymentMethod == 'Cash') ...[
+                                  SizedBox(height: 8),
+                                  Text(
+                                    'Uang Pembeli: Rp ${NumberFormat.decimalPattern('id').format(customerCash)}',
+                                    style: TextStyle(fontSize: 14),
+                                  ),
+                                  Text(
+                                    'Kembalian: Rp ${NumberFormat.decimalPattern('id').format(change)}',
+                                    style: TextStyle(fontSize: 14),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     );
                   },
@@ -121,7 +151,7 @@ class _LaporanState extends State<Laporan> {
               },
             ),
       bottomNavigationBar: Navbar(
-        currentIndex: 3,  // Sesuaikan dengan index Laporan
+        currentIndex: 3, // Sesuaikan dengan index Laporan
         onTabTapped: (index) {
           if (index == 0) {
             Navigator.of(context).pushReplacement(

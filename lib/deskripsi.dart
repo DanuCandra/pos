@@ -15,17 +15,30 @@ class Deskripsi extends StatelessWidget {
     return formatter.format(value);
   }
 
+  IconData getCategoryIcon(String category) {
+    switch (category) {
+      case 'Minuman':
+        return Icons.local_cafe;
+      case 'Snack':
+        return Icons.cookie;
+      default:
+        return Icons.restaurant;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'Detail Makanan',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+              fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
         ),
+        centerTitle: true,
         backgroundColor: Colors.teal,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -44,11 +57,11 @@ class Deskripsi extends StatelessWidget {
                 Center(
                   child: CircleAvatar(
                     radius: 60,
-                    backgroundColor: Colors.teal.withOpacity(0.2),
+                    backgroundColor: Colors.teal, // Tetap gelap
                     child: Icon(
-                      Icons.fastfood,
+                      getCategoryIcon(menu['category']),
                       size: 60,
-                      color: Colors.teal,
+                      color: Colors.white, // Ikon menjadi putih untuk kontras
                     ),
                   ),
                 ),
@@ -83,7 +96,8 @@ class Deskripsi extends StatelessWidget {
                     );
                   },
                   icon: Icon(Icons.edit),
-                  label: Text('Edit Makanan'),
+                  label: Text('Edit Makanan',
+                      style: TextStyle(color: Colors.white)),
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(vertical: 15),
                     backgroundColor: Colors.teal,
