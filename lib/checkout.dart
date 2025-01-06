@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pos_kasir/database_helper.dart';
-import 'package:pos_kasir/login_screen.dart';
-import 'package:pos_kasir/tambahmenu.dart';
 import 'package:pos_kasir/laporan.dart';
-import 'home.dart';
-import 'navbar.dart';
+import 'package:pos_kasir/login_screen.dart';
+import 'package:pos_kasir/navbar.dart';
+import 'package:pos_kasir/home.dart';
+import 'package:pos_kasir/tambahmenu.dart';
 
 class Checkout extends StatefulWidget {
   final List<Map<String, dynamic>> checkoutItems;
@@ -143,14 +143,23 @@ class CheckoutState extends State<Checkout> {
                           final transaction = {
                             'date': DateTime.now().toIso8601String(),
                             'total': totalAmount,
-                            'payment_method': _selectedPaymentMethod ??
-                                'Unknown', // Save payment method
-                            'change': _changeAmount ?? 0, // Save change amount
+                            'payment_method': _selectedPaymentMethod ?? 'Unknown',
+                            'change': _changeAmount ?? 0,
+                            'customer_cash': _customerCash ?? 0,
                           };
 
                           // Save the transaction in the database
-                          await DatabaseHelper.instance
+                          int transactionId = await DatabaseHelper.instance
                               .insertTransaction(transaction);
+
+                          // Save the items related to this transaction
+                          for (var item in widget.checkoutItems) {
+                            await DatabaseHelper.instance.insertTransactionItem({
+                              'transaction_id': transactionId,
+                              'menu_id': item['id'],
+                              'quantity': item['quantity'],
+                            });
+                          }
 
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -170,8 +179,10 @@ class CheckoutState extends State<Checkout> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => Laporan(
-                                    checkoutItems: widget.checkoutItems)),
+                              builder: (context) => Laporan(
+                                checkoutItems: widget.checkoutItems,
+                              ),
+                            ),
                           );
                         }
                       : null,
@@ -221,8 +232,7 @@ class CheckoutState extends State<Checkout> {
                     itemBuilder: (context, index) {
                       final item = widget.checkoutItems[index];
                       return Card(
-                        margin:
-                            EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        margin: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
                         ),
@@ -244,8 +254,7 @@ class CheckoutState extends State<Checkout> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
-                                icon: Icon(Icons.remove_circle,
-                                    color: Colors.red),
+                                icon: Icon(Icons.remove_circle, color: Colors.red),
                                 onPressed: () {
                                   setState(() {
                                     if (item['quantity'] > 1) {
@@ -259,8 +268,7 @@ class CheckoutState extends State<Checkout> {
                               Text('${item['quantity']}',
                                   style: TextStyle(fontSize: 18)),
                               IconButton(
-                                icon:
-                                    Icon(Icons.add_circle, color: Colors.green),
+                                icon: Icon(Icons.add_circle, color: Colors.green),
                                 onPressed: () {
                                   setState(() {
                                     item['quantity']++;

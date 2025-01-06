@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:pos_kasir/checkout.dart';
 import 'package:pos_kasir/database_helper.dart';
-import 'home.dart';
-import 'tambahmenu.dart';
-import 'checkout.dart';
-import 'login_screen.dart';
-import 'navbar.dart';
+import 'package:pos_kasir/home.dart';
+import 'package:pos_kasir/login_screen.dart';
+import 'package:pos_kasir/tambahmenu.dart';
+import 'navbar.dart'; 
 
 class Laporan extends StatefulWidget {
   final List<Map<String, dynamic>> checkoutItems;
@@ -25,15 +25,29 @@ class _LaporanState extends State<Laporan> {
     _loadTransactions();
   }
 
-  // Load transactions from the database
   Future<void> _loadTransactions() async {
-    final transactions = await DatabaseHelper.instance.getTransactions();
+    final transactions = await DatabaseHelper.instance.getAllTransactions();
     setState(() {
       _transactions = transactions;
     });
   }
 
-  // Function to format the date for display
+  Future<List<Map<String, dynamic>>> _getTransactionItems(int transactionId) async {
+    final items = await DatabaseHelper.instance.getTransactionItems(transactionId);
+    final itemDetails = await Future.wait(items.map((item) async {
+      final menu = await DatabaseHelper.instance.getMenus();
+      final menuItem = menu.firstWhere(
+        (menu) => menu['id'] == item['menu_id'],
+        orElse: () => {'name': 'Unknown'},
+      );
+      return {
+        'name': menuItem['name'],
+        'quantity': item['quantity'],
+      };
+    }));
+    return itemDetails;
+  }
+
   String _formatDate(String isoDate) {
     final dateTime = DateTime.parse(isoDate);
     return DateFormat('dd-MM-yyyy HH:mm').format(dateTime);
@@ -52,44 +66,62 @@ class _LaporanState extends State<Laporan> {
               itemCount: _transactions.length,
               itemBuilder: (context, index) {
                 final transaction = _transactions[index];
-
+                final transactionId = transaction['id'];
                 final totalAmount = transaction['total'] ?? 0;
-                final payment = transaction['payment_method'] ?? 'Unknown';
-                final change = transaction['change'] ?? 0;  // Default to 0 if 'change' doesn't exist
+                final paymentMethod = transaction['payment_method'] ?? 'Unknown';
+                final customerCash = transaction['customer_cash'] ?? 0;
+                final change = transaction['change'] ?? 0;
+                final date = _formatDate(transaction['date']);
 
-                return Card(
-                  margin: EdgeInsets.all(12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  elevation: 4,
-                  child: ListTile(
-                    title: Text(
-                      'Total: Rp ${NumberFormat.decimalPattern('id').format(totalAmount)}',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Tanggal: ${_formatDate(transaction['date'])}'),
-                        SizedBox(height: 10),
-                        Text(
-                          'Pembayaran: $payment',
-                          style: TextStyle(fontSize: 14),
+                return FutureBuilder<List<Map<String, dynamic>>>( 
+                  future: _getTransactionItems(transactionId),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    }
+
+                    final items = snapshot.data ?? [];
+                    final totalItems = items.fold<int>(
+                        0, (sum, item) => sum + (item['quantity'] as int));
+
+                    return Card(
+                      margin: EdgeInsets.all(12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      elevation: 4,
+                      child: ListTile(
+                        title: Text(
+                          'Total: Rp ${NumberFormat.decimalPattern('id').format(totalAmount)}',
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        SizedBox(height: 8),
-                        Text(
-                          'Kembalian: Rp ${NumberFormat.decimalPattern('id').format(change)}',
-                          style: TextStyle(fontSize: 14),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Tanggal: $date'),
+                            Text('Pembayaran: $paymentMethod'),
+                            Text('Jumlah Item Terjual: $totalItems'),
+                            ...items.map((item) => Text(
+                                  '${item['name']} x ${item['quantity']}',
+                                )),
+                            if (paymentMethod == 'Cash') ...[
+                              Text(
+                                'Uang Pembeli: Rp ${NumberFormat.decimalPattern('id').format(customerCash)}',
+                              ),
+                              Text(
+                                'Kembalian: Rp ${NumberFormat.decimalPattern('id').format(change)}',
+                              ),
+                            ],
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  },
                 );
               },
             ),
       bottomNavigationBar: Navbar(
-        currentIndex: 3,
+        currentIndex: 3,  // Sesuaikan dengan index Laporan
         onTabTapped: (index) {
           if (index == 0) {
             Navigator.of(context).pushReplacement(
