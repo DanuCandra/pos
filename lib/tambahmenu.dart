@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pos_kasir/checkout.dart';
 import 'package:pos_kasir/home.dart';
+import 'package:pos_kasir/laporan.dart';
 import 'package:pos_kasir/login_screen.dart';
 import 'navbar.dart';
 import 'database_helper.dart';
@@ -59,9 +60,9 @@ class _TambahMenuState extends State<TambahMenu> {
       appBar: AppBar(
         title: const Text(
           'Tambah Menu',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        backgroundColor: Colors.indigo[700],
+        backgroundColor: Colors.teal[700],
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -169,7 +170,7 @@ class _TambahMenuState extends State<TambahMenu> {
               const SizedBox(height: 20),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.indigo,
+                  backgroundColor: Colors.teal,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -220,6 +221,15 @@ class _TambahMenuState extends State<TambahMenu> {
               ),
             );
           } else if (index == 3) {
+            Navigator.of(context).pushReplacement(
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    Laporan(checkoutItems: widget.checkoutItems),
+                transitionDuration: Duration.zero,
+                reverseTransitionDuration: Duration.zero,
+              ),
+            );
+          }else if (index == 4) {
             Navigator.of(context).pushReplacement(
               PageRouteBuilder(
                 pageBuilder: (context, animation, secondaryAnimation) =>

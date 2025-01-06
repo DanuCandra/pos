@@ -21,13 +21,13 @@ class DatabaseHelper {
 
   Future<Database> _initializeDatabase() async {
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'menu_database.db');
+    final path = join(dbPath, 'r.db');
 
     return await openDatabase(
       path,
       version: 1,
       onCreate: (db, version) {
-        db.execute('''
+        db.execute(''' 
           CREATE TABLE menus(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT,
@@ -36,10 +36,21 @@ class DatabaseHelper {
             category TEXT
           )
         ''');
+
+        db.execute(''' 
+          CREATE TABLE transactions(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date TEXT,
+            total INTEGER,
+            payment_method TEXT, 
+            change INTEGER       
+          )
+        ''');
       },
     );
   }
 
+  // Menu-related functions
   Future<int> insertMenu(Map<String, dynamic> menu) async {
     final db = await database;
     return await db.insert('menus', menu);
@@ -58,5 +69,28 @@ class DatabaseHelper {
   Future<int> deleteMenu(int id) async {
     final db = await database;
     return await db.delete('menus', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<int> insertTransaction(Map<String, dynamic> transaction) async {
+    final db = await database;
+    return await db.insert('transactions', transaction);
+  }
+
+  Future<List<Map<String, dynamic>>> getTransactions() async {
+    final db = await database;
+    return await db.query('transactions');
+  }
+
+  Future<List<Map<String, dynamic>>> getTransactionsSorted() async {
+    final db = await database;
+    return await db.query(
+      'transactions',
+      orderBy: 'date DESC',
+    );
+  }
+
+  String formatDate(String isoDate) {
+    final dateTime = DateTime.parse(isoDate);
+    return DateFormat('dd-MM-yyyy HH:mm').format(dateTime);
   }
 }

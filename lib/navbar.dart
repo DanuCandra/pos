@@ -11,16 +11,15 @@ class Navbar extends StatelessWidget {
     return BottomNavigationBar(
       currentIndex: currentIndex,
       onTap: onTabTapped,
-      backgroundColor: Colors.blue,
+      backgroundColor: Colors.teal,
       selectedItemColor: Colors.white,
       unselectedItemColor: Colors.grey[400],
       type: BottomNavigationBarType.fixed,
       items: [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle), label: 'Tambah Menu'),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart), label: 'Checkout'),
+        BottomNavigationBarItem(icon: Icon(Icons.add_circle), label: 'Tambah Menu'),
+        BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Checkout'),
+        BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Laporan'),
         BottomNavigationBarItem(icon: Icon(Icons.logout), label: 'Logout'),
       ],
     );

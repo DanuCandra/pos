@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pos_kasir/deskripsi.dart';
+import 'package:pos_kasir/tambahmenu.dart';
+import 'package:pos_kasir/checkout.dart';
+import 'package:pos_kasir/login_screen.dart';
+import 'package:pos_kasir/navbar.dart';
+import 'package:pos_kasir/laporan.dart'; // Pastikan Laporan.dart diimport di sini
 import 'database_helper.dart';
-import 'tambahmenu.dart';
-import 'checkout.dart';
-import 'login_screen.dart';
-import 'navbar.dart';
 
 class Home extends StatefulWidget {
   final List<Map<String, dynamic>> checkoutItems;
@@ -69,8 +70,39 @@ class _HomeState extends State<Home> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${menu['name']} berhasil ditambahkan ke keranjang!'),
-          duration: Duration(seconds: 2),
+          content: Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.teal),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  '${menu['name']} berhasil ditambahkan ke keranjang!',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+          duration: Duration(seconds: 3),
+          action: SnackBarAction(
+            label: 'Undo',
+            textColor: Colors.orange,
+            onPressed: () {
+              setState(() {
+                if (existingItem.isNotEmpty) {
+                  existingItem['quantity']--;
+                  if (existingItem['quantity'] == 0) {
+                    widget.checkoutItems.remove(existingItem);
+                  }
+                } else {
+                  widget.checkoutItems.removeWhere((item) => item['id'] == menu['id']);
+                }
+              });
+            },
+          ),
+          backgroundColor: Colors.teal.shade100,
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       );
     });
@@ -102,6 +134,14 @@ class _HomeState extends State<Home> {
         ),
       );
     } else if (index == 3) {
+      // Navigasi ke halaman Laporan
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Laporan(checkoutItems: widget.checkoutItems), // Arahkan ke halaman Laporan
+        ),
+      );
+    } else if (index == 4) {
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) =>
@@ -146,7 +186,7 @@ class _HomeState extends State<Home> {
       ),
       bottomNavigationBar: Navbar(
         currentIndex: _currentIndex,
-        onTabTapped: _onTabTapped,
+        onTabTapped: _onTabTapped, // Arahkan ke halaman yang sesuai
       ),
     );
   }

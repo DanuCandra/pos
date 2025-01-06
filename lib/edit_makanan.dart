@@ -3,8 +3,8 @@ import 'package:pos_kasir/checkout.dart';
 import 'package:pos_kasir/home.dart';
 import 'package:pos_kasir/login_screen.dart';
 import 'package:pos_kasir/tambahmenu.dart';
+import 'package:pos_kasir/navbar.dart';
 import 'database_helper.dart';
-import 'navbar.dart';
 
 class EditMakanan extends StatefulWidget {
   final Map<String, dynamic> menu;
@@ -65,7 +65,7 @@ class _EditMakananState extends State<EditMakanan> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Edit Makanan', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.indigo,
+        backgroundColor: Colors.teal, // Sesuaikan warna navbar dengan tema
         actions: [
           IconButton(
             icon: Icon(Icons.delete, color: Colors.white),
@@ -143,7 +143,7 @@ class _EditMakananState extends State<EditMakanan> {
             SizedBox(height: 20),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.indigo,
+                backgroundColor: Colors.teal, // Ganti warna tombol dengan warna utama
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -156,7 +156,7 @@ class _EditMakananState extends State<EditMakanan> {
         ),
       ),
       bottomNavigationBar: Navbar(
-        currentIndex: 1,
+        currentIndex: 1, // Sesuaikan indeks navbar (misalnya, halaman ini terkait dengan menu)
         onTabTapped: (index) {
           if (index == 0) {
             Navigator.of(context).pushReplacement(
