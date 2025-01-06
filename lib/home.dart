@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; 
+import 'package:intl/intl.dart';
 import 'package:pos_kasir/deskripsi.dart';
 import 'database_helper.dart';
 import 'tambahmenu.dart';
@@ -134,120 +134,151 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.restaurant_menu, color: Colors.white),
-            SizedBox(width: 8),
-            Text('Menu Danu Cafe', style: TextStyle(fontWeight: FontWeight.bold)),
-          ],
-        ),
+        title: Text('Menu Danu Cafe', style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.teal,
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Cari menu...',
-                prefixIcon: Icon(Icons.search, color: Colors.teal),
-                filled: true,
-                fillColor: Colors.teal.shade50,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-              onChanged: (value) {
-                _searchQuery = value;
-                _filterMenus();
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: ['Semua', 'Makanan', 'Minuman', 'Snack']
-                    .map(
-                      (category) => Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: ChoiceChip(
-                          label: Text(category),
-                          selected: _activeCategory == category,
-                          onSelected: (selected) {
-                            setState(() {
-                              _activeCategory = category;
-                              _filterMenus();
-                            });
-                          },
-                          selectedColor: Colors.teal,
-                          backgroundColor: Colors.teal.shade100,
-                          labelStyle: TextStyle(
-                            color: _activeCategory == category
-                                ? Colors.white
-                                : Colors.teal.shade800,
-                          ),
-                        ),
-                      ),
-                    )
-                    .toList(),
-              ),
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: filteredMenus.length,
-              itemBuilder: (context, index) {
-                final menu = filteredMenus[index];
-                return Card(
-                  margin: EdgeInsets.all(10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  elevation: 5,
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      radius: 30,
-                      backgroundColor: Colors.teal.shade100,
-                      child: Icon(
-                        getCategoryIcon(menu['category']),
-                        color: Colors.teal,
-                        size: 28,
-                      ),
-                    ),
-                    title: Text(
-                      menu['name'],
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(formatCurrency(menu['price'])),
-                    trailing: IconButton(
-                      icon: Icon(Icons.shopping_cart, color: Colors.green),
-                      onPressed: () => _addToCheckout(menu),
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Deskripsi(
-                            menu: menu,
-                            checkoutItems: widget.checkoutItems,
-                          ),
-                        ),
-                      ).then((_) => _loadMenus());
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
+          _buildSearchBar(),
+          _buildCategoryChips(),
+          _buildMenuList(),
         ],
       ),
       bottomNavigationBar: Navbar(
         currentIndex: _currentIndex,
         onTabTapped: _onTabTapped,
+      ),
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: TextField(
+        decoration: InputDecoration(
+          hintText: 'Cari menu...',
+          prefixIcon: Icon(Icons.search, color: Colors.teal),
+          filled: true,
+          fillColor: Colors.teal.shade50,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: BorderSide.none,
+          ),
+        ),
+        onChanged: (value) {
+          _searchQuery = value;
+          _filterMenus();
+        },
+      ),
+    );
+  }
+
+  Widget _buildCategoryChips() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      child: Row(
+        children: ['Semua', 'Makanan', 'Minuman', 'Snack']
+            .map((category) => Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: ChoiceChip(
+                    label: Text(category),
+                    selected: _activeCategory == category,
+                    onSelected: (selected) {
+                      setState(() {
+                        _activeCategory = category;
+                        _filterMenus();
+                      });
+                    },
+                    selectedColor: Colors.teal,
+                    backgroundColor: Colors.teal.shade100,
+                    labelStyle: TextStyle(
+                      color: _activeCategory == category
+                          ? Colors.white
+                          : Colors.teal.shade800,
+                    ),
+                  ),
+                ))
+            .toList(),
+      ),
+    );
+  }
+
+  Widget _buildMenuList() {
+    return Expanded(
+      child: GridView.builder(
+        padding: EdgeInsets.all(8),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+          childAspectRatio: 3 / 4,
+        ),
+        itemCount: filteredMenus.length,
+        itemBuilder: (context, index) {
+          final menu = filteredMenus[index];
+          return _buildMenuCard(menu);
+        },
+      ),
+    );
+  }
+
+  Widget _buildMenuCard(Map<String, dynamic> menu) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      elevation: 3,
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Deskripsi(
+                menu: menu,
+                checkoutItems: widget.checkoutItems,
+              ),
+            ),
+          ).then((_) => _loadMenus());
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.teal.shade50,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+                ),
+                child: Icon(
+                  getCategoryIcon(menu['category']),
+                  size: 48,
+                  color: Colors.teal,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    menu['name'],
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    formatCurrency(menu['price']),
+                    style: TextStyle(color: Colors.grey.shade600),
+                  ),
+                ],
+              ),
+            ),
+            TextButton.icon(
+              onPressed: () => _addToCheckout(menu),
+              icon: Icon(Icons.shopping_cart, color: Colors.teal),
+              label: Text('Tambah'),
+            ),
+          ],
+        ),
       ),
     );
   }
