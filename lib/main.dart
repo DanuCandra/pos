@@ -1,6 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:pos_kasir/home.dart';
+import 'package:pos_kasir/login_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Danu Cafe POS',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: Home(checkoutItems: []),
+      home: LoginScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

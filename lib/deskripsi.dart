@@ -95,7 +95,7 @@ class Deskripsi extends StatelessWidget {
                       ),
                     );
                   },
-                  icon: Icon(Icons.edit),
+                  icon: Icon(Icons.edit , color: Colors.white),
                   label: Text('Edit Makanan',
                       style: TextStyle(color: Colors.white)),
                   style: ElevatedButton.styleFrom(
