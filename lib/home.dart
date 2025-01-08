@@ -135,10 +135,12 @@ class _HomeState extends State<Home> {
       );
     } else if (index == 3) {
       
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => Laporan(checkoutItems: widget.checkoutItems), 
+      Navigator.of(context).push(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              Laporan(checkoutItems: widget.checkoutItems),
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
         ),
       );
     } else if (index == 4) {
